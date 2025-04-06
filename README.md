@@ -1,1 +1,177 @@
-# 5igma
+# teamdev-2025-posse2-team4B
+
+Laravel インストール方法
+docker compose build --no-cache (ビルドする)
+docker compose up -d (コンテナをたてる)
+docker compose exec app sh (appコンテナに入る)
+composer install 
+cp .env.example .env
+php artisan key:generate
+
+ブラウザで http://localhost にアクセスし、Laravelのロゴ入りのトップページが表示されることを確認
+
+データベースの作成
+appコンテナに入っていることを確認
+
+(入っていなければ、docker compose exec app sh)
+src > .env の内容を以下のように書き換える
+
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=org_improvement
+DB_USERNAME=5igma
+DB_PASSWORD=password
+
+php artisan migrate をして、以下のように出力されていれば成功
+
+2014_10_12_000000_create_users_table ........................................ 274ms DONE
+2014_10_12_100000_create_password_reset_tokens_table ........................ 196ms DONE
+2019_08_19_000000_create_failed_jobs_table .................................. 116ms DONE
+2019_12_14_000001_create_personal_access_tokens_table ....................... 196ms DONE
+Breeze インストール方法 PHP側
+appコンテナに入っていることを確認
+(入っていなければ、docker compose exec app sh)
+composer require laravel/breeze --dev
+php artisan breeze:install を入力し、選択肢は以下の通り
+Which stack would you like to install? : 0 (blade)
+Would you like to install dark mode support? : no
+Would you prefer Pest tests instead of PHPUnit? : no
+breeze install php
+Breeze インストール方法 NODE側
+src/package.json の内容のscripts部分を以下のように変更する
+
+変更点としてはdevの"vite"のみだったのが "vite --host" というhostオプションを付け足しています
+    "scripts": {
+        "dev": "vite --host",
+        "build": "vite build"
+},
+nodeコンテナに入っていることを確認
+
+(入っていなければ、docker compose exec node sh)
+npm install
+
+npm run dev or npm run build
+
+buildは現時点のファイルを読み込んでファイルを生成します (build後にtailwindのクラス名を追加した場合は再度buildが必要です)
+devは変更点をずっと監視しつづけるのでスペックがギリギリだとパソコンに負荷がかかるかもなので、見た目の編集しないときはbuildを利用してください
+
+
+
+
+
+**組織環境改善支援プロダクト BizBuddy 使用方法**
+_概要_
+このプロダクトは、管理職を中心とした企業の組織改善を手助けする組織環境改善支援プロダクトである。全社員に対するアンケートの送付、回収、集計結果の表示、そしてその結果を受け取る管理職への組織改善提案、施策の実行の支援に至るまでの、企業の組織改善プロセスの一連の流れをサポートする役割を担うことができる。
+
+_1,ログイン_
+事前にリンク社と企業の間で契約するBtoBプロダクトという位置付けである特性上、アカウントはリンク社側（開発側）が発行するという形式をとっており、ユーザー新規登録機能は設けていません。以下の情報からそれぞれのアカウントにログインしてテストを行なってください。
+
+企業設定admin用アカウント（1企業に原則一つのみ）
+name: test0
+email: test0@gmail.com
+password: password
+//admin：こちらは全社アンケートの送付の日程を決める設定用アカウントになります。
+
+経営層アカウント
+name: test1
+email: test1@gmail.com
+password: password
+//executive : こちらは現場職ではない経営層、人事部向けアカウントになります。
+
+管理職アカウント
+name: test2
+email: test2@gmail.com
+password: password
+//management: こちらは管理職用アカウントになります。テスト環境では部長職としています。
+
+従業員アカウント
+name: test3
+email: test3@gmail.com
+password: password
+//employee: 従業員用アカウントになります。従業員はアカウントにログインし、アンケートに回答します。また従業員のメールアドレスに直接アンケートのリンクが送付されます。
+
+_2,アンケートを回答する機能①_ (従業員アカウント)
+半年に一回全社一斉で職場環境改善アンケートを行います。
+
+
+レスポンシブに対応しています。
+アンケートはお題資料にある16個の大項目と各大項目に付随する4つの小項目で構成されています。
+16個の大項目はそれぞれ期待度と満足度の二つの観点からの5段階評価、小項目は満足度の5段階評価です。
+自動保存機能がついており、離脱しても途中から回答ができます。**want**
+
+
+_3,アンケートを集計する機能_　（管理職アカウント）
+
+1: localhost/login より管理職アカウントでログインします
+2: 当該管理職アカウントが統括する部署内の集計結果が表示されたdashboardが表示されます
+
+《主要16項目満足度》
+当該部署における主要16項目の総合満足度の推移を表しています**must**
+
+《期待度×満足度ボトルネックスコア》
+組織のボトルネックを見つけるためこのプロダクトが独自に設定している指標になります。
+主要16項目の期待度と満足度をそれぞれ5段階で評価し、期待度（E）満足度（S）ボトルネックスコア（X）としたとき、
+E（E-S）＝X　（0≦X）（0>Xは切り捨て）
+で表されます。このスコアが最も高い大項目がこの組織（部署）のボトルネックになります。
+dashboardで表示されているのは部署におけるボトルネックスコアの総和であり、このスコアを減らすことが組織改善につながります。**must**
+
+《期待度×満足度マトリクス》
+縦軸に期待度E、横軸に期待度・満足度ギャップ E-Sをプロットしたグラフになります。右上に近づくほどボトルネックといえる項目であり、左上に近づくほど組織の優れた項目になります。
+
+3: 左サイドバーより上から二番目のアイコンがanalyticsページになります。
+当該部署の主要ボトルネックを表しており、その期待度と満足度、付随する小項目の調査結果が表示されます。**must**
+
+4: analyticsページの右側　調査結果詳細ボタンより、調査結果詳細ページへ遷移します。
+この一覧表で設問分類ごとの一覧で平均点が表示されます **must**
+
+5: 左サイドバーの一番下のアイコンあるいはanalyticsより右下よりtrackingページ（施策タイムライン）に遷移します。
+
+_4, 施策立案を支援する機能_　_5,施策実行を支援する機能_
+施策タイムラインは施策立案機能、施策実行機能を集約し、管理職の組織改善へのアクションを総合的にサポートします。
+
+1: ボトルネックと認められた大項目の職場環境改善アンケート満足度を基準として、半年後の職場環境改善アンケートでの満足度上昇を組織マネジメントの目標とします。タイムラインには長期目標の設定（次回の職場環境改善アンケートで目指す満足度を設定する）コンポーネントと、施策・短期目標の設定というコンポーネントが存在します。
+
+2: 施策・短期目標の設定ではボトルネックの結果を受けて、AIによる施策提案を受けることができます。**must**
+
+3: 定性情報の追加　ではAI施策提案の精度を上げるため、管理職が直接AIに定性情報を入力することができます。空欄でもAIは職場環境改善アンケートの結果を受けて、管理職に施策を提案します。**want**
+
+4: Buddyによる提案・改善計画ではAIが組織の状態に適した三つの組織改善案から、管理職が一つ取り組む施策を決定します
+
+5: 施策実行を支援する機能としてパルスサーベイを実行します **must** 次回のパルスサーベイまでの短期目標を、実施計画の設定で定めます。**want**
+
+6: 次回のパルスサーベイまでのマイルストーンを設定できます。
+
+7: トラッキング計画の設定ではパルスサーベイの期間を設定します。施策計画の確定ボタンを押すと、タイムラインに戻ります。
+
+8: タイムラインでは先ほど追加したマイルストーンとそれに応じたコンポーネントが表示されています。**must** **want**
+
+9: パルスサーベイが行われると調査結果が自動でこのタイムラインに表示されます。その結果を受けて、施策の継続判断・長期目標の再設定・施策の再設定の三つが選択できます。
+
+10:「施策を継続する」を選択すると施策継続ページに遷移し、再び、次のパルスサーベイまでの短期目標、マイルストーン、パルスサーベイ設定を行います。
+
+11: 施策実行の後、次回の職場環境改善アンケートを経て施策の完了・結果が表示されます。ここでは前回の職場環境改善アンケートと比べて結果がどう変化したのかを知ることができます。
+
+_6,経営層・人事が施策状況を確認する機能_
+経営層アカウントでログインすると会社全体のサーベイの結果が表示されます。手順は管理職と同様です。
+注意点
+
+メール送信機能について
+SMTP機能を使用しております。ローカル環境のみでしか使用できないため、採点者がアンケートの送信機能をテストするときは採点者のgoogleアカウントの2段階認証を行なったあと、アプリパスワードを取得し、.envに記載をお願いします。
+
+例
+MAIL_MAILER=smtp MAIL_HOST=smtp.gmail.com MAIL_PORT=587 MAIL_USERNAME=katsuyoshikanado@gmail.com MAIL_PASSWORD=ummscuukmcqexcyq MAIL_ENCRYPTION=tls MAIL_FROM_ADDRESS="katsuyoshikanado@gmail.com" MAIL_FROM_NAME="BizBuddy"
+
+seederを回したらアンケートが自動送信されます。
+シーダーに入っているデータにより、採点者が採点する日程は職場環境改善アンケートの送信日時に含まれています。また、adminアカウントでログインした設定画面でも任意の日付でメールが送られるようになります。
+
+アンケート自動送信機能により送られたメールを受け取るにはseederに自分のメールアドレスを登録する必要があります。
+
+openai apiキー
+OPENAI_API_KEY=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
+
+備考欄：
+経営者ダッシュボード：/executive/dashboard
+ログアウト機能：/logout
+パルスサーベイ：/start/{survey}
+surveysテーブル=survey_types_id=2で 自分の部署の最新の日程
