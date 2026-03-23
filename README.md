@@ -168,7 +168,7 @@ seederを回したらアンケートが自動送信されます。
 アンケート自動送信機能により送られたメールを受け取るにはseederに自分のメールアドレスを登録する必要があります。
 
 openai apiキー
-OPENAI_API_KEY=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
+
 
 備考欄：
 経営者ダッシュボード：/executive/dashboard
